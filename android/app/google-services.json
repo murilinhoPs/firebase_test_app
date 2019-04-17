@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "340441447054",
+    "firebase_url": "https://firestemic.firebaseio.com",
+    "project_id": "firestemic",
+    "storage_bucket": "firestemic.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:340441447054:android:668472927ef418c9",
+        "android_client_info": {
+          "package_name": "com.MuriloPs.FireStemic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "340441447054-bpuhg55gen9hbcoj73stqemu1lr5vel8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaXJLjgx3umJnXUYCBv2Bq7drJ0eyld3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "340441447054-bpuhg55gen9hbcoj73stqemu1lr5vel8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
