@@ -61,28 +61,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     )));
         detectarErro = false;
       } catch (e) {
+        detectarErro = true;
         print(e.message);
         print(error);
-        // inicializar que deu erro, para poder chamar de outro lugar o void e não dar erro.
-        errorCallback();
       }
     }
   }
 
 // chamar o metodo quando não conseguir logar, por email errado ou senha errada
   void errorCallback() {
-    detectarErro = true;
+    //detectarErro = true;
     // Essa variavel serve para detectar quantas vezes o usuario errou de senha, apenas uma int que dimunui seu valor
     error--;
     // quando faltar 3 tentativas, mostra um alerta sobre o que vai acontecer
-    if (error <= 3 && error > 0) {
+    if (error <= 4 && error > 0) {
       _errorMessage = 'Senha Incorreta';
       showDialog<String>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
                 title: Text('Senha incorreta'),
                 content: Text(
-                    'seu usuario sera deletado se errar 3 vezes a senha. Quantidade de tentativas: ' +
+                    'seu usuario sera bloqueado se errar 3 vezes a senha. Quantidade de tentativas: ' +
                         error.toString()),
                 actions: <Widget>[
                   FlatButton(
@@ -228,6 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         //user.reload();
                         signIn();
                         if (detectarErro) {
+                          // inicializar que deu erro, para poder chamar de outro lugar o void e não dar erro.
                           errorCallback();
                         }
                       })),
@@ -236,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: EdgeInsets.only(top: 5, bottom: 10),
                 child: GestureDetector(
                   onTap: () {
-                   // _esqueciMinhaSenha();
+                    // _esqueciMinhaSenha();
                   },
                   child: Text(
                     'Esqueceu sua senha? Clique Aqui',
@@ -301,12 +301,13 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         if (!input.contains('@')) {
           detectarErro = false;
+
           return 'Digite um email válido.';
         }
-        else if (input.contains('@')) {
-          detectarErro = true;
-          return 'Digite um email válido.';
-        }
+        //  if (input.contains('@')) {
+        //   //detectarErro = true;
+        //   return '...';
+        // }
       },
       onSaved: (String input) => _email = input,
     );
@@ -339,9 +340,10 @@ class _LoginScreenState extends State<LoginScreen> {
           detectarErro = false;
           return 'Campo obrigatório*';
         }
-        else if(input.length < 6){
-          return 'A senha deve ter no mínimo 6 caracteres.';
-        }
+        // else if(input.length < 6){
+        //   detectarErro = false;
+        //   return 'A senha deve ter no mínimo 6 caracteres.';
+        // }
       },
       onSaved: (String input) => _password = input,
     );
