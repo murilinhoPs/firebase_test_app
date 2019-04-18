@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Essa variavel serve para detectar quantas vezes o usuario errou de senha, apenas uma int que dimunui seu valor
     error--;
     // quando faltar 3 tentativas, mostra um alerta sobre o que vai acontecer
-    if (error < 4 && error > 0) {
+    if (error <= 3 && error > 0) {
       _errorMessage = 'Senha Incorreta';
       showDialog<String>(
           context: context,
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (BuildContext context) => AlertDialog(
                 title: Text('Usuário bloqueado'),
                 content: Text(
-                    'Senha errada 3 vezes, é obrigatório redefinir sua senha para poder acessar a plataforma.'),
+                    'Senha errada 3 vezes, redefina sua senha ou feche o app e tente novamente.'),
                 actions: <Widget>[
                   FlatButton(
                     child: Text('Ok'),
@@ -303,6 +303,10 @@ class _LoginScreenState extends State<LoginScreen> {
           detectarErro = false;
           return 'Digite um email válido.';
         }
+        else if (input.contains('@')) {
+          detectarErro = true;
+          return 'Digite um email válido.';
+        }
       },
       onSaved: (String input) => _email = input,
     );
@@ -334,6 +338,9 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (input.isEmpty) {
           detectarErro = false;
           return 'Campo obrigatório*';
+        }
+        else if(input.length < 6){
+          return 'A senha deve ter no mínimo 6 caracteres.';
         }
       },
       onSaved: (String input) => _password = input,
