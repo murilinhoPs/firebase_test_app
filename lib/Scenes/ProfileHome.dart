@@ -21,8 +21,12 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading:  IconButton(tooltip: 'LogOut',
-          icon: Icon(Icons.arrow_back,semanticLabel: 'LogOut',),
+        leading: IconButton(
+          tooltip: 'LogOut',
+          icon: Icon(
+            Icons.arrow_back,
+            semanticLabel: 'LogOut',
+          ),
           onPressed: () {
             FirebaseAuth.instance.signOut();
             Navigator.push(
@@ -35,6 +39,10 @@ class _ProfilePageState extends State<ProfilePage> {
           'Home: ' + _user.email,
           style: TextStyle(fontSize: 16),
         ), //${widget.user.email}
+      ),
+      body: Text(
+        'Usuario entrou com sucesso',
+        textAlign: TextAlign.center,
       ),
     );
   }

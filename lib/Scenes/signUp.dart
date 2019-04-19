@@ -133,6 +133,7 @@ class _CriarContaState extends State<CriarConta> {
         }
       },
       onSaved: (String input) => _email = input,
+      keyboardType: TextInputType.emailAddress,
     );
   }
 

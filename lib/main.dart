@@ -52,17 +52,18 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         user = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: _email, password: _password);
-        //Navigator.pushNamed(context, '/profile');
         Navigator.push(
             context,
             MaterialPageRoute<Future>(
                 builder: (BuildContext context) => ProfilePage(
                       user: user,
                     )));
-        detectarErro = false;
       } catch (e) {
         detectarErro = true;
         print(e.message);
+        print(e);
+        // Essa variavel serve para detectar quantas vezes o usuario errou de senha, apenas uma int que dimunui seu valor
+        error--;
         print(error);
       }
     }
@@ -70,11 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
 // chamar o metodo quando não conseguir logar, por email errado ou senha errada
   void errorCallback() {
-    //detectarErro = true;
-    // Essa variavel serve para detectar quantas vezes o usuario errou de senha, apenas uma int que dimunui seu valor
-    error--;
+    detectarErro = false;
     // quando faltar 3 tentativas, mostra um alerta sobre o que vai acontecer
-    if (error <= 4 && error > 0) {
+    if (error <= 3) {
       _errorMessage = 'Senha Incorreta';
       showDialog<String>(
           context: context,
@@ -124,6 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ));
       user.updatePassword('password');
     }
+    //detectarErro = false;
   }
 
 // metodo que mostra uma notificação em baixo da tela dizendo que foi mandado um email para redefinir senha
@@ -139,30 +139,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     _scaffoldKey.currentState.showSnackBar(snackBar);
-  }
-
-  void _esqueciMinhaSenha() {
-    showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Text('Esqueci minha Senha'),
-              content: Text('Sua senha será enviada no email ' + _email),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('Ok'),
-                  onPressed: () {
-                    Navigator.of(context).pop('Ok');
-                  },
-                ),
-                FlatButton(
-                  child: Text('Mandar senha no email'),
-                  onPressed: () {
-                    Navigator.of(context).pop('Ok');
-                    //TODO: implement to send user password flutter_email_sender 2.0.0
-                  },
-                ),
-              ],
-            ));
   }
 
 // Dividi tudo em Widgets para ficar mais organizado e ficar mais facil de encontar as partes da UI
@@ -224,22 +200,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                       onPressed: () {
-                        //user.reload();
-                        signIn();
                         if (detectarErro) {
                           // inicializar que deu erro, para poder chamar de outro lugar o void e não dar erro.
                           errorCallback();
                         }
+                        signIn();
+                        detectarErro = false;
                       })),
               Container(
                 // link Esqueceu sua senha
                 padding: EdgeInsets.only(top: 5, bottom: 10),
                 child: GestureDetector(
                   onTap: () {
-                    // _esqueciMinhaSenha();
+                    //_esqueciMinhaSenha();
+                    FirebaseAuth.instance.sendPasswordResetEmail(email: _email);
+                    _showSnackBarConfirmation();
                   },
                   child: Text(
-                    'Esqueceu sua senha? Clique Aqui',
+                    'Esqueceu sua senha? Clique Aqui para trocar a senha pelo email',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                         decoration: TextDecoration.underline,
                         decorationColor: Colors.red),
@@ -270,6 +249,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: TextDecoration.underline,
                           decorationColor: Colors.red),
                     )),
+              ),
+              FlatButton(padding: EdgeInsets.all(4),
+                child: Text(
+                  'Termos e condições de Uso',
+                  style: TextStyle(fontSize: 12),
+                ),
+                onPressed: () {},
               )
             ],
           ),
