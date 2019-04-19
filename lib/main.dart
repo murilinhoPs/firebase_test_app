@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'Scenes/ProfileHome.dart';
 import 'Scenes/signUp.dart';
@@ -80,17 +81,26 @@ class _LoginScreenState extends State<LoginScreen> {
         print(e.message);
         print(e);
         // Essa variavel serve para detectar quantas vezes o usuario errou de senha, apenas uma int que dimunui seu valor
-        error--;
-        print(error);
+
       }
+    }
+  }
+
+  Future<void> resetPassword() async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: _email);
+    } catch (e) {
+      print(e.message);
     }
   }
 
 // chamar o metodo quando não conseguir logar, por email errado ou senha errada
   void errorCallback() {
-    detectarErro = false;
+    error--;
+    print(error);
+    detectarErro = !detectarErro;
     // quando faltar 3 tentativas, mostra um alerta sobre o que vai acontecer
-    if (error <= 3) {
+    if (error <= 4 && error > 0) {
       _errorMessage = 'Senha Incorreta';
       showDialog<String>(
           context: context,
@@ -110,13 +120,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ));
     }
     // Se zera as tentativas, o usuario recebe uma notificação no email para redefinição de senha
-    if (error <= 2) {
+    if (error <= 0) {
       error = 0;
       _errorMessage = 'Redefina sua senha';
       showDialog<String>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-                title: Text('Usuário bloqueado'),
+                title: Text('App bloqueado'),
                 content: Text(
                     'Senha errada 3 vezes, redefina sua senha ou feche o app e tente novamente.'),
                 actions: <Widget>[
@@ -141,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
       user.updatePassword('password');
     }
 
-   //detectarErro = false;
+    //detectarErro = false;
   }
 
 // metodo que mostra uma notificação em baixo da tela dizendo que foi mandado um email para redefinir senha
@@ -162,6 +172,11 @@ class _LoginScreenState extends State<LoginScreen> {
 // Dividi tudo em Widgets para ficar mais organizado e ficar mais facil de encontar as partes da UI
   @override
   Widget build(BuildContext context) {
+      try{(FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: _email, password: _password));}
+          catch(e){
+            
+          }
     // o método principal para o flutter saber o que renderizar
     return Scaffold(
         key: _scaffoldKey,
@@ -229,14 +244,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           // a variavel detectar erro para false
                           errorCallback();
                         }
-                        detectarErro = false;
+
+                        detectarErro = !detectarErro;
                       })),
               Container(
                 // link Esqueceu sua senha
                 padding: EdgeInsets.only(top: 5, bottom: 10),
                 child: GestureDetector(
                   onTap: () {
-                    //_esqueciMinhaSenha();
+                    //resetPassword();
                     FirebaseAuth.instance.sendPasswordResetEmail(email: _email);
                     _showSnackBarConfirmation(); // mostrar alerta que o usuario recebeu um email para resetar a senha
                   },
@@ -282,6 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 onPressed: () {
                   launchUrl();
+                  // _showSnackBarConfirmation();
                 },
               )
             ],
@@ -324,6 +341,8 @@ class _LoginScreenState extends State<LoginScreen> {
         // }
       },
       onSaved: (String input) => _email = input,
+      // o jeito que o teclado do telefone aparece é para digitar o email
+      keyboardType: TextInputType.emailAddress,
     );
   }
 
