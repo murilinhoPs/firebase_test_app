@@ -28,25 +28,31 @@ class LoginScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _LoginScreenState();
 }
 
-// São os estados que vão ser mudados
+// São os estados que vão mudar
 class _LoginScreenState extends State<LoginScreen> {
-  // variaveis padrão que são usadas nessa classe
+  // form state para o widget Form, para poder administrar dados/propriedades dos Form fields.
+  // como salvar o estado deles, verificar se é valido o input...
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Strings separadas para eu poder mexer nelas depois
   String _email, _password, _errorMessage;
   // contagem de error
   int error = 4;
-  // so vai detectar o erro quando ela for true, para detectar um tipo de erro e nao todos
+  // so vai detectar o erro de autenticação quando ela for true, tenho um arquivo .txt explicando melhor como
+  // era para ela funcionar
   bool detectarErro = false;
-// variaveis do Firebase (Google Firebase)
+  // variaveis do Firebase (Google Firebase)
   FirebaseUser user;
 
-// variaveis do gradient do background do menu
+  // variaveis do gradient do background do menu
   Color gradientStart = Colors.purple[700];
   Color gradientFinal = Colors.purple[400];
 
-// Métodos
+  // Métodos
 
+// método para entrar no link (que é o termos e condiçoes de uso)
   Future<void> launchUrl() async {
     String url = 'http://epistemic.com.br/';
     if (await canLaunch(url)) {
@@ -177,6 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ]));
   }
 
+  //Widget do estilo da UI, o fundo branco com os inputFields, botão de entrar e textos com hyperlinks
   Widget uIElementsTree(BuildContext context) {
     // armazena toda a Ui, o fundo branco, os textos e os InputFields
     return Form(
@@ -190,6 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisSize: MainAxisSize.min,
             //crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              // d
               Container(
                   // emailInput
                   width: 280,
@@ -202,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: passwordTextInput(context)),
               Container(
                   // Login Button
-                  width: 220,
+                  width: 220, // tamanho do botao
                   padding: EdgeInsets.only(top: 15),
                   child: RaisedButton(
                       color: Colors.deepPurple[400],
@@ -212,10 +220,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       onPressed: () {
                         if (detectarErro) {
-                          // inicializar que deu erro, para poder chamar de outro lugar o void e não dar erro.
+                          // indicar que o usuário errou a senha 1*
+                          // 1* tem um erro nessa parte, de que depois que errou a senha duas vezes
+                          // a parte do FirebaseAuth não funciona mais, mesmo no final eu mudando
+                          // a variavel detectar erro para false
                           errorCallback();
+                        } else if (!detectarErro) {
+                          signIn(); // se nao puder detectar erro, faz login. Mas só funciona errando
+                          // apenar uma vez a senha
                         }
-                        signIn();
                         detectarErro = false;
                       })),
               Container(
@@ -225,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onTap: () {
                     //_esqueciMinhaSenha();
                     FirebaseAuth.instance.sendPasswordResetEmail(email: _email);
-                    _showSnackBarConfirmation();
+                    _showSnackBarConfirmation(); // mostrar alerta que o usuario recebeu um email para resetar a senha
                   },
                   child: Text(
                     'Esqueceu sua senha? Clique Aqui para trocar a senha pelo email',
@@ -243,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               Container(
                 // Link Cadastre-se
-                padding: EdgeInsets.only(bottom: 20, top: 5),
+                padding: EdgeInsets.only(top: 5),
                 child: GestureDetector(
                     onTap: () {
                       //Navigator.pushNamed(context, '/singUp');
@@ -267,13 +280,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Termos e condições de Uso',
                   style: TextStyle(fontSize: 12),
                 ),
-                onPressed: () {launchUrl();},
+                onPressed: () {
+                  launchUrl();
+                },
               )
             ],
           ),
         ));
   }
 
+  // Widget do inputField do email, tudo que gerenciei nele
   Widget emailTextInput(BuildContext context) {
     // elementos e propriedades do InputField do e-mail
     return TextFormField(
@@ -311,6 +327,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Widget do inputField da senha, tudo que gerenciei nele
   Widget passwordTextInput(BuildContext context) {
     // elementos e propriedades do InputField do e-mail
     String displayMessage; // mensagem que vai mostrar se deu erro

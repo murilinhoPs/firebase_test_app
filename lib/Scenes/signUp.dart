@@ -1,23 +1,33 @@
+import 'dart:async';
 import 'package:fire_stemic/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'dart:async';
-
+// O código de criar sua conta no Firebase. Recebe um email e uma senha, se o email existir
+// um email de confirmação será enviado
 class CriarConta extends StatefulWidget {
   @override
   _CriarContaState createState() => _CriarContaState();
 }
 
 class _CriarContaState extends State<CriarConta> {
+  // form state para o widget Form, para poder administrar dados/propriedades dos Form fields.
+  // como salvar o estado deles, verificar se é valido o input...
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _email, _password, _nameId;
+
+  // string de email e senha para eu poder acessar
+  String _email, _password;
+
+  // variaveis firebase
   FirebaseUser user;
 
+  // variaveis de cor para o gradient do fundo
   Color gradientStart = Colors.purple[700];
   Color gradientFinal = Colors.purple[400];
 
+  // Métodos
+
+  // método de se cadastrar
   Future<void> signUp() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
@@ -33,6 +43,7 @@ class _CriarContaState extends State<CriarConta> {
     }
   }
 
+  // método para mostrar que um email de confirmação foi enviado no email cadastrado
   void mostrarAviso() {
     String title, body;
     title = 'Verificação de Email';
@@ -57,6 +68,8 @@ class _CriarContaState extends State<CriarConta> {
             ));
   }
 
+  // widget build da classe, para saber qual a arvore de elementos principal que
+  // a classe irá renderizar
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +77,8 @@ class _CriarContaState extends State<CriarConta> {
           automaticallyImplyLeading: true,
         ),
         body: Stack(children: <Widget>[
-          // coloquei em Stack para os elementos poderem se sobrepor, os elementos de login se sobreporem nesse background
+          // coloquei em Stack para os elementos poderem se sobrepor,
+          //os elementos de login se sobreporem nesse background
 
           // É o container que muda a cor do fundo, o gradiente roxo. Apenas decoração
           Container(
@@ -76,11 +90,12 @@ class _CriarContaState extends State<CriarConta> {
             ),
           )),
           // Center element para poder centralizar os elemtos aqui dentro. Width and Height Factor é como uma margem, para nao ficar totalmente centralizado, apenas usei o centro de referencia para ajustar a sua posicao a partir do centro
-          Container(alignment: Alignment.center, child: loginCard(context)),
+          Container(alignment: Alignment.center, child: uIElementsTree(context)),
         ]));
   }
 
-  Widget loginCard(BuildContext context) {
+// Widget do estilo da UI, o fundo branco com os inputFields, botão de entrar e textos com hyperlinks
+  Widget uIElementsTree(BuildContext context) {
     return Form(
         key: _formKey,
         child: Container(
@@ -92,6 +107,7 @@ class _CriarContaState extends State<CriarConta> {
             mainAxisSize: MainAxisSize.min,
             //crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              // dividi tudo em containers para eu poder personalizar o espaçamento entre os elementos
               Container(
                   // emailInput
                   width: 280,
@@ -103,30 +119,30 @@ class _CriarContaState extends State<CriarConta> {
                   padding: EdgeInsets.only(top: 15),
                   child: passwordTextInput(context)),
               Container(
-                  // Login Button
-                  width: 220,
-                  padding: EdgeInsets.only(top: 15),
-                  child: RaisedButton(
-                    color: Colors.deepPurple[400],
-                    child: Text(
-                      ('Cadastrar'),
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    onPressed: () {
-                      signUp();
-                    }, //signIn,
-                  )),
-              Container(
-                height: 10,
+                // SignUp Button
+                margin: EdgeInsets.only(bottom: 10), // uma margem no final para nao ficar muito pequeno o cartao de fundo
+                width: 220, // mexer no tamanho do botao
+                padding: EdgeInsets.only(top: 15),
+                child: RaisedButton(
+                  color: Colors.deepPurple[400],
+                  child: Text(
+                    ('Cadastrar'),
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                  onPressed: () {
+                    signUp();
+                  },
+                ),
               ),
             ],
           ),
         ));
   }
 
+  // Widget do inputField do email, tudo que gerenciei nele
   Widget emailTextInput(BuildContext context) {
     return TextFormField(
-      // Style
+      // Style (estilo do inputField)
       cursorColor: Colors.purple,
       cursorWidth: 2.0,
       decoration: InputDecoration(
@@ -142,18 +158,21 @@ class _CriarContaState extends State<CriarConta> {
           fillColor: Colors.white70),
       // Proprieties
       validator: (String input) {
-        if (input.isEmpty) {
+        // tem que ter o arroba e nao estar vazio para ser um email váilido
+        if (input.isEmpty || !input.contains('@')) {
           return 'Digie um email válido';
         }
       },
       onSaved: (String input) => _email = input,
+      // o jeito que o teclado do telefone aparece é para digitar o email
       keyboardType: TextInputType.emailAddress,
     );
   }
 
+  // Widget do inputField da senha, tudo que gerenciei nele
   Widget passwordTextInput(BuildContext context) {
     return TextFormField(
-      // Style
+      // Style (estilo do inputField)
       obscureText: true,
       cursorColor: Colors.purple,
       decoration: InputDecoration(
@@ -169,6 +188,7 @@ class _CriarContaState extends State<CriarConta> {
           fillColor: Colors.white70),
       // Proprieties
       validator: (String input) {
+        // a senha tem que ter pelo menos 6 digitos
         if (input.length < 6) {
           return 'Digite uma senha com 6 ou mais caracteres';
         }
