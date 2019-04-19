@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ));
     }
     // Se zera as tentativas, o usuario recebe uma notificação no email para redefinição de senha
-    if (error <= 0) {
+    if (error <= 2) {
       error = 0;
       _errorMessage = 'Redefina sua senha';
       showDialog<String>(
@@ -140,7 +140,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ));
       user.updatePassword('password');
     }
-    //detectarErro = false;
+
+   //detectarErro = false;
   }
 
 // metodo que mostra uma notificação em baixo da tela dizendo que foi mandado um email para redefinir senha
@@ -219,15 +220,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                       onPressed: () {
+                        signIn(); // se nao puder detectar erro, faz login. Mas só funciona errando
+                        // apenar uma vez a senha
                         if (detectarErro) {
                           // indicar que o usuário errou a senha 1*
                           // 1* tem um erro nessa parte, de que depois que errou a senha duas vezes
                           // a parte do FirebaseAuth não funciona mais, mesmo no final eu mudando
                           // a variavel detectar erro para false
                           errorCallback();
-                        } else if (!detectarErro) {
-                          signIn(); // se nao puder detectar erro, faz login. Mas só funciona errando
-                          // apenar uma vez a senha
                         }
                         detectarErro = false;
                       })),
