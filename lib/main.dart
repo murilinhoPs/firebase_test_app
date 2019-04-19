@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'Scenes/ProfileHome.dart';
 import 'Scenes/signUp.dart';
@@ -44,6 +46,15 @@ class _LoginScreenState extends State<LoginScreen> {
   Color gradientFinal = Colors.purple[400];
 
 // Métodos
+
+  Future<void> launchUrl() async {
+    String url = 'http://epistemic.com.br/';
+    if (await canLaunch(url)) {
+      launch(url);
+    } else {
+      print("Nao foi possivel se comunicar com o servidor");
+    }
+  }
 
 // metodo que cuida do firebaseAuth(autenticar o usuario pelo firebase)
   Future<void> signIn() async {
@@ -250,12 +261,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           decorationColor: Colors.red),
                     )),
               ),
-              FlatButton(padding: EdgeInsets.all(4),
+              FlatButton(
+                padding: EdgeInsets.all(4),
                 child: Text(
                   'Termos e condições de Uso',
                   style: TextStyle(fontSize: 12),
                 ),
-                onPressed: () {},
+                onPressed: () {launchUrl();},
               )
             ],
           ),

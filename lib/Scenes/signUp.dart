@@ -2,6 +2,7 @@ import 'package:fire_stemic/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'dart:async';
 
 class CriarConta extends StatefulWidget {
@@ -16,6 +17,45 @@ class _CriarContaState extends State<CriarConta> {
 
   Color gradientStart = Colors.purple[700];
   Color gradientFinal = Colors.purple[400];
+
+  Future<void> signUp() async {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      try {
+        user = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: _email, password: _password);
+        user.sendEmailVerification();
+        mostrarAviso();
+        //Navigator.pushNamed(context, '/profile');
+      } catch (e) {
+        print(e.message);
+      }
+    }
+  }
+
+  void mostrarAviso() {
+    String title, body;
+    title = 'Verificação de Email';
+    body =
+        'Você recebeu uma confirmação no seu e-mail, cheque para se cadastrar';
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: Text(title),
+              content: Text(body + ' ' + user.email),
+              actions: <Widget>[
+                FlatButton(
+                    child: Text('Ok'),
+                    onPressed: () {
+                      Navigator.pop(context, 'Ok');
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute<Future>(
+                              builder: (BuildContext context) => MyApp()));
+                    })
+              ],
+            ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,32 +124,6 @@ class _CriarContaState extends State<CriarConta> {
         ));
   }
 
-  Widget nameTextInput(BuildContext context) {
-    return TextFormField(
-      // Style
-      cursorColor: Colors.purple,
-      cursorWidth: 2.0,
-      decoration: InputDecoration(
-          hintText: 'E-mail',
-          prefixIcon: Container(
-            color: Colors.black12,
-            padding: EdgeInsets.only(top: 3),
-            margin: EdgeInsets.only(right: 6.5),
-            child: Icon(Icons.person),
-          ),
-          //icon: Icon(Icons.email,),
-          filled: true,
-          fillColor: Colors.white70),
-      // Proprieties
-      validator: (String input) {
-        if (input.isEmpty) {
-          return 'Digie um nome válido';
-        }
-      },
-      onSaved: (String input) => _nameId = input,
-    );
-  }
-
   Widget emailTextInput(BuildContext context) {
     return TextFormField(
       // Style
@@ -161,43 +175,5 @@ class _CriarContaState extends State<CriarConta> {
       },
       onSaved: (String input) => _password = input,
     );
-  }
-
-  Future<void> signUp() async {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-      try {
-        user = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: _email, password: _password);
-        user.sendEmailVerification();
-        mostrarAviso();
-        //Navigator.pushNamed(context, '/profile');
-      } catch (e) {
-        print(e.message);
-      }
-    }
-  }
-
-  void mostrarAviso() {
-    String title, body;
-    title = 'Verificação de Email';
-    body = 'Você recebeu uma confirmação no seu e-mail, cheque para se cadastrar';
-    showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Text(title),
-              content: Text(body + ' ' + user.email),
-              actions: <Widget>[
-                FlatButton(
-                    child: Text('Ok'),
-                    onPressed: () {
-                      Navigator.pop(context, 'Ok');
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute<Future>(
-                              builder: (BuildContext context) => MyApp()));
-                    })
-              ],
-            ));
   }
 }
