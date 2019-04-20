@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // Strings separadas para eu poder mexer nelas depois
   String _email, _password, _errorMessage;
   // contagem de error
-  int error = 4;
+  int error = 5;
   // so vai detectar o erro de autenticação quando ela for true, tenho um arquivo .txt explicando melhor como
   // era para ela funcionar
   bool detectarErro = false;
@@ -64,24 +64,25 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
 // metodo que cuida do firebaseAuth(autenticar o usuario pelo firebase)
-  Future<void> signIn() async {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-      try {
-        user = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: _email, password: _password);
-        Navigator.push(
-            context,
-            MaterialPageRoute<Future>(
-                builder: (BuildContext context) => ProfilePage(
-                      user: user,
-                    )));
-      } catch (e) {
-        detectarErro = true;
-        print(e.message);
-        print(e);
-        // Essa variavel serve para detectar quantas vezes o usuario errou de senha, apenas uma int que dimunui seu valor
-
+  Future<FirebaseAuth> firebaseSignIn() async {
+    _formKey.currentState.save();
+    try {
+      user = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: _email, password: _password);
+      Navigator.push(
+          context,
+          MaterialPageRoute<Future>(
+              builder: (BuildContext context) => ProfilePage(
+                    user: user,
+                  )));
+    } catch (e) {
+      detectarErro = true;
+      print(e.message);
+      print(e);
+      // só vai diminuir a quantidade de erros se o inputText for valido
+      if (_formKey.currentState.validate()) {
+        error--;
+        print(error);
       }
     }
   }
@@ -90,17 +91,18 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: _email);
     } catch (e) {
-      print(e.message);
+      print(e);
     }
   }
 
 // chamar o metodo quando não conseguir logar, por email errado ou senha errada
-  void errorCallback() {
+  void firebaseSignInError() {
+    detectarErro = false;
     error--;
     print(error);
-    detectarErro = !detectarErro;
+
     // quando faltar 3 tentativas, mostra um alerta sobre o que vai acontecer
-    if (error <= 4 && error > 0) {
+    if (error <= 3 && error > 0) {
       _errorMessage = 'Senha Incorreta';
       showDialog<String>(
           context: context,
@@ -108,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 title: Text('Senha incorreta'),
                 content: Text(
                     'seu usuario sera bloqueado se errar 3 vezes a senha. Quantidade de tentativas: ' +
-                        error.toString()),
+                        (error).toString()),
                 actions: <Widget>[
                   FlatButton(
                     child: Text('Ok'),
@@ -134,6 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text('Ok'),
                     onPressed: () {
                       Navigator.of(context).pop('Ok');
+                      user = null;
                     },
                   ),
                   FlatButton(
@@ -142,16 +145,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.of(context).pop('Ok');
                       FirebaseAuth.instance
                           .sendPasswordResetEmail(email: _email);
-                      //TODO: show info on skacnBar (email send)
                       _showSnackBarConfirmation();
+                      user = null;
                     },
                   ),
                 ],
               ));
-      user.updatePassword('password');
     }
-
-    //detectarErro = false;
   }
 
 // metodo que mostra uma notificação em baixo da tela dizendo que foi mandado um email para redefinir senha
@@ -172,11 +172,10 @@ class _LoginScreenState extends State<LoginScreen> {
 // Dividi tudo em Widgets para ficar mais organizado e ficar mais facil de encontar as partes da UI
   @override
   Widget build(BuildContext context) {
-      try{(FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: _email, password: _password));}
-          catch(e){
-            
-          }
+    try {
+      (FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: _email, password: _password));
+    } catch (e) {}
     // o método principal para o flutter saber o que renderizar
     return Scaffold(
         key: _scaffoldKey,
@@ -235,17 +234,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                       onPressed: () {
-                        signIn(); // se nao puder detectar erro, faz login. Mas só funciona errando
-                        // apenar uma vez a senha
-                        if (detectarErro) {
-                          // indicar que o usuário errou a senha 1*
-                          // 1* tem um erro nessa parte, de que depois que errou a senha duas vezes
-                          // a parte do FirebaseAuth não funciona mais, mesmo no final eu mudando
-                          // a variavel detectar erro para false
-                          errorCallback();
-                        }
 
-                        detectarErro = !detectarErro;
+                        firebaseSignIn();
+                        
+                        // essa variavel fica false quando clicar no botao entrar, volta para o estado inicial
+                        // se der erro no login, ela fica true para mostrar o erro
+                        // se puder detectar o erro e o Input de senha e email tiver validado faz isso
+                        // se não chama o firebase
+                        if (detectarErro) {
+                          // quando apertar entrar, chama o método
+                          firebaseSignInError();
+                        }
+                        detectarErro = false;
                       })),
               Container(
                 // link Esqueceu sua senha
